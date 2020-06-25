@@ -84,9 +84,7 @@ def check_point(point: Point, polygon: List[Point]):
     return intersections % 2 == 1
 
 
-def check_users(users, places):
-    writer_coroutine = write_results(RESULT)
-    next(writer_coroutine)
+def check_users(users, places, writer_coroutine):
     
     for user_id, user_point in users.items():
         writer_coroutine.send(Point(user_id, sum({check_point(user_point, place) for place in places.values()})))
@@ -95,8 +93,11 @@ def check_users(users, places):
 def main():
     users = parse_users(USERS)
     places = parse_places(PLACES)
+
+    writer_coroutine = write_results(RESULT)
+    next(writer_coroutine)
     
-    check_users(users, places)
+    check_users(users, places, writer_coroutine)
 
 
 if __name__ == '__main__':
