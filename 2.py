@@ -1,6 +1,6 @@
 import csv
 from collections import defaultdict, namedtuple
-from typing import List
+from typing import List, Dict
 
 
 PLACES = 'place_zone_coordinates.csv'
@@ -11,11 +11,22 @@ Point = namedtuple('Point', ['x', 'y'])
 
 
 def skip_rows(reader, n):
+    """
+    Function to skip n line of csv to read. Just why not
+    :param reader: csv.reader object
+    :param n: n rows to skip
+    :return: None
+    """
     for i in range(n):
         next(reader)
 
 
 def parse_places(filename):
+    """
+    Parses information about places polygons to dictionary
+    :param filename: str; valid filepath
+    :return: dictionary of places' polygons; key - id of place, value - list of polygon vertices in given order
+    """
     places = defaultdict(list)
     with open(filename, 'r') as fn:
         reader = csv.reader(fn)
@@ -27,6 +38,11 @@ def parse_places(filename):
 
 
 def parse_users(filename):
+    """
+    Parses information about users coordinates to dictionary
+    :param filename: str; valid filepath
+    :return: dictionary of users; key - user id, value - user coordinates as namedtuple Point
+    """
     users = {}
     with open(filename, 'r') as fn:
         reader = csv.reader(fn)
@@ -38,6 +54,12 @@ def parse_users(filename):
 
 
 def write_results(filename):
+    """
+    A small coroutine to write lines "on-fly"
+    :param filename: str; valid filepath
+    :return: None
+    """
+    
     with open(filename, 'w', newline='') as fn:
         writer = csv.writer(fn)
         writer.writerows([('id', 'number_of_places_available'), ''])
@@ -84,8 +106,14 @@ def check_point(point: Point, polygon: List[Point]):
     return intersections % 2 == 1
 
 
-def check_users(users, places, writer_coroutine):
-    
+def check_users(users: Dict[int, Point], places: Dict[int, List[Point]], writer_coroutine):
+    """
+    Counts available places for users one by one and sends information to writer
+    :param users: parsed users information to dictionary
+    :param places: parsed places information to dictionary
+    :param writer_coroutine: initialized object of writer coroutine
+    :return: None
+    """
     for user_id, user_point in users.items():
         writer_coroutine.send(Point(user_id, sum({check_point(user_point, place) for place in places.values()})))
 
