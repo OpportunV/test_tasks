@@ -65,7 +65,7 @@ def write_results(filename):
         writer.writerows([('id', 'number_of_places_available'), ''])
         pair: Point = yield  # where x is the user id and y is the number of places available
         while pair is not None:
-            writer.writerow([pair.x, pair.y])
+            writer.writerow(pair)
             pair = yield
 
 
@@ -83,7 +83,7 @@ def check_point(point: Point, polygon: List[Point]):
         p2 = polygon[i]
         # if point higher or lower than edge we immediately go to the next edge
         if min(p1.y, p2.y) <= point.y <= max(p1.y, p2.y):
-            # Here goes the check for horizontal edge case, if so - it doesn't counts
+            # Here goes the check for horizontal edge case
             if abs(point.y - p1.y) <= ATOL:
                 if p1.y < p2.y:
                     intersections += 1
@@ -93,6 +93,7 @@ def check_point(point: Point, polygon: List[Point]):
                 if point.x < p2.x:
                     intersections += 1
             # Here goes a "regular" edge case
+            # Line equation is used to figure out does ray intersect the edge or not
             else:
                 k = (p2.y - p1.y) / (p2.x - p1.x)  # y = k*x + b -- line equation
                 b = p1.y - k * p1.x
